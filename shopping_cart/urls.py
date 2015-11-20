@@ -3,14 +3,14 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
 
-urlpatterns = [
+urlpatterns = (
     # Examples:
     # url(r'^$', 'shopping_cart.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('angular_cart.urls')),
-]
+)
 
 urlpatterns += urlpatterns('',
             url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {

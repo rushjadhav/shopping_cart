@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load staticfiles %}
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Shopping Cart </title>
+
+        <link rel="stylesheet" href={% static "angular_cart/css/bootstrap.min.css" %}>
+        <link rel="stylesheet" href={% static "angular_cart/css/shop-homepage.css" %}>
+    </head>
+
+    <body ng-app="main-app" ng-controller="mainController">
+
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="">Shopping Cart</a>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="/admin">Login</a>
+                        </li>
+                        <li>
+                            <a href="#" ng-click="showCart()">Cart([[ cart | keylength ]])</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container" >
+            <input type="hidden" ng-model="currentCategory">
+            <div class="row">
+                <div class="col-md-3 left-menu"> 
+                    <input type="text" class="form-control" placeholder="Search..." ng-model=filterValue>
+                    <div class="list-group">
+                        <a ng-repeat="c in categories | filter: filterValue" href="#" ng-click="setCategory(c.id)" class="list-group-item" >
+                            [[c.name]]([[c.productCount]])
+                        </a>
+                    </div>
+                </div>
+
+                <div class="container col-md-9" ng-show="thankyouPage">
+                    <h4> Thank you [[fName]] [[lName]] for shopping with us... </h4>
+                </div>
+
+                <div class="container col-md-9 my-cart" ng-show="cartClicked && cart.length">
+                    <h4 class="title">Your Cart</h4>
+                    <table class="table table-bordered">
+                  	    <th>
+                   		    <td>Product</td>
+                   		    <td>Quantity</td>
+                    	    <td>Price</td>
+                	        <td>Remove</td>
+                   		</th>
+                   		<tr ng-repeat="product in cart">
+                   		    <td></td>
+                   		    <td>[[product.name]]</td>
+                   		    <td>[[product.quantity]]</td>
+                    	    <td>[[product.price * product.quantity | currency:"&#8377;"]]</td>
+                	        <td>
+                                <span class="glyphicon glyphicon-remove" ng-click="removeProductFromCart(product)" title="Remove [[product.name]] from cart"></span>
+                            </td>
+                    	</tr>
+                    </table>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-danger" ng-click="clearAllCart()" data-dismiss="modal">Remove All</button>
+                    </div>
+                </div>
+
+                <div class="container col-md-9 my-cart" ng-show="!cart.length && cartClicked" >
+                    <p class="alert alert-info">
+                        Currently their are no products in your cart. Please add some products !!!
+                    </p>
+                </div>
+
+                <div class="container col-md-9 my-cart" ng-show="cartClicked && cart.length">
+                    <form class="form-horizontal" name="cartForm">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">First Name*:</label>
+                            <div class="col-sm-10">
+                                <input type="text" ng-model="fName" placeholder="First Name" required>
+                            </div>
+                        </div> 
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Last Name*:</label>
+                            <div class="col-sm-10">
+                                <input type="text" ng-model="lName" placeholder="Last Name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Email*:</label>
+                            <div class="col-sm-10">
+                                <input type="email" ng-model="email" placeholder="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Shipping Address*:</label>
+                            <div class="col-sm-10">
+                                <textarea ng-model="shippingAddress" placeholder="Address" required></textarea>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <div class="pull-right">
+                        <button class="btn btn-success" ng-disabled="cartForm.$invalid" ng-click="placeOrder()">
+                            <span class="glyphicon glyphicon-save"></span>  Place Order
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-9" ng-hide="cartClicked">
+                    <div class="row carousel-holder" ng-hide="currentCategory">
+                        <div class="col-md-12">
+                            <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+                                <ol class="carousel-indicators">
+                                    <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                                    <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+                                    <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+                                </ol>
+                                <div class="carousel-inner">
+                                    {% for product in products %}
+                                        <div class="item {% if forloop.first %} active {% endif %}">
+                                            <img class="slide-image" src="{{product.image.url}}" alt="">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
+                                    <span class="glyphicon glyphicon-chevron-left"></span>
+                                </a>
+                                <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
+                                    <span class="glyphicon glyphicon-chevron-right"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <div class="row">  
+                            <div class="pull-right">  
+                                <input type="text" class="form-control" ng-show="categorySelected" placeholder="Search product..." ng-model=filterProduct>
+                            </div>
+                        </div>
+                        <div ng-repeat="product in products| filter: filterProduct" class="col-sm-4 col-lg-4 col-md-4">
+                            <div class="thumbnail">
+                                <img src="[[product.image]]" alt="">
+                                <div class="caption">
+                                    <h4 class="pull-right">[[product.price| currency:"&#8377;"]]</h4>
+                                    <span class="glyphicon glyphicon-shopping-cart" data-toggle="modal" data-target="#AddToCartModal" ng-click="setProduct(product.id)" title="Add [[product.name]] to cart"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container">
+            <!-- Modal -->
+            <div class="modal fade" id="AddToCartModal" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                	        <button type="button" class="close" data-dismiss="modal">&times;</button>
+              		        <h4 class="modal-title">[[selectedProduct.name]]</h4>
+          	            </div>
+          	            <div class="modal-body">
+                            <div class="thumbnail">
+                                <img src="[[selectedProduct.image]]" alt="">
+                            </div>
+                           <div class="caption">
+                               <h4>Price:</h4>
+                               <p class="text-success">[[selectedProduct.price| currency:"&#8377;"]]</p>
+                               <h4>Description:</h4>
+                               <p class="text-info">[[selectedProduct.description]]</p>
+                           </div>
+        	            </div>
+          	            <div class="modal-footer">
+                            Quantity*: <input type="text" ng-model="quantity">
+	                        <button type="button" class="btn btn-success" ng-click="addToCart(selectedProduct.id, quantity)"
+                                ng-disabled="!hasValidQuantity()" data-dismiss="modal">
+                                Add to Cart
+                            </button>
+	                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="row">
+            </div>
+        </footer>
+
+    </body>
+
+    {% block bottomjs %}
+        <script src={% static "angular_cart/js/jquery.min.js" %}></script>
+        <script src={% static "angular_cart/js/bootstrap.min.js" %}></script>
+        <script src={% static "angular_cart/js/angular.min.js" %}></script>
+        <script src={% static "angular_cart/js/shopping_cart_menu.js" %}></script>
+    {% endblock %}
+</html>

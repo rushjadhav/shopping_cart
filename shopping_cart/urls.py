@@ -12,10 +12,10 @@ urlpatterns = (
     url(r'^', include('angular_cart.urls')),
 )
 
-urlpatterns += urlpatterns('',
-            url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
-                        'document_root': settings.STATIC_ROOT,
-                            }),
-             )
+#urlpatterns += urlpatterns('',
+#            url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
+#                        'document_root': settings.STATIC_ROOT,
+#                            }),
+#             )
 
 admin.site.site_header = 'Shopping Cart Administration'
